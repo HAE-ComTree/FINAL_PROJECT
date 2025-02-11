@@ -7,7 +7,7 @@
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
 #define ISR_PRIORITY_STM        40                              /* Priority for interrupt ISR                       */
-#define TIMER_INT_TIME          10                             /* Time between interrupts in ms                    */
+#define TIMER_INT_TIME          5                             /* Time between interrupts in ms                    */
 #define STM                     &MODULE_STM0                    /* STM0 is used in this example                     */
 
 #define GEAR_RATIO              18.75
@@ -33,7 +33,7 @@ PIDREG3 Motor_B_speed_pid = PIDREG3_DEFAULTS;
 volatile float32 Kp_s=2,Ki_s=0.2,Kd_s=0;
 boolean STM_IT_FLAG = FALSE;
 IfxStm_CompareConfig g_STMConf;
-Ifx_TickTime g_ticksFor1ms;;
+Ifx_TickTime g_ticksFor5ms;;
 
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
@@ -126,12 +126,12 @@ void initSTM(void)
 
     g_STMConf.triggerPriority = ISR_PRIORITY_STM;
     g_STMConf.typeOfService = IfxSrc_Tos_cpu0;
-    g_STMConf.ticks = (uint32)g_ticksFor1ms;
+    g_STMConf.ticks = (uint32)g_ticksFor5ms;
     IfxStm_initCompare(STM, &g_STMConf);
 }
 
 void initPeripherals(void)
 {
-    g_ticksFor1ms = IfxStm_getTicksFromMilliseconds(BSP_DEFAULT_TIMER, TIMER_INT_TIME);
+    g_ticksFor5ms = IfxStm_getTicksFromMilliseconds(BSP_DEFAULT_TIMER, TIMER_INT_TIME);
     initSTM();
 }

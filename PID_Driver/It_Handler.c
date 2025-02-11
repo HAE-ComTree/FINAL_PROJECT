@@ -57,5 +57,5 @@ void Enc_10ms_Handler(void)
     }
 
     STM_IT_FLAG = FALSE;
-    IfxStm_increaseCompare(STM, g_STMConf.comparator, (uint32)g_ticksFor1ms);
+    IfxStm_increaseCompare(STM, g_STMConf.comparator, (uint32)g_ticksFor5ms);
 }

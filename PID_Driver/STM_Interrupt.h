@@ -29,7 +29,7 @@ extern boolean STM_IT_FLAG;
 extern PIDREG3 speed_pid;
 extern PIDREG3 Motor_B_speed_pid;
 extern IfxStm_CompareConfig g_STMConf;
-extern Ifx_TickTime g_ticksFor1ms;
+extern Ifx_TickTime g_ticksFor5ms;
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Data Structures---------------------------------------------------*/

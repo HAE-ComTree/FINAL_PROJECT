@@ -9,7 +9,7 @@
 #define ISR_PRIORITY_ATOM  20
 #define LED                IfxGtm_ATOM1_1_TOUT1_P02_1_OUT
 #define Motor_B_PWM        IfxGtm_ATOM1_3_TOUT105_P10_3_OUT
-#define PWM_PERIOD         5000
+#define PWM_PERIOD         1000
 #define CLK_FREQ           1000000.0f
 #define PWMA_PIN &MODULE_P02,1   // Motor_A PWM 핀 (P2.1)
 #define BRAKEA_PIN &MODULE_P02,7 // Motor_A 브레이크 핀 (P2.7)

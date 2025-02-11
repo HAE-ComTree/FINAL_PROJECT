@@ -46,6 +46,8 @@ void Car_Stop_Gradually(void)
     setMotor_B_Control(0, 0);
 }
 
+
+
 void Car_Change_Direction_Right(void)
 {
     RPM_CMD2 = 2000;

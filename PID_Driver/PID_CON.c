@@ -14,8 +14,8 @@
 
 #include <PID_Driver/PID_CON.h>
 
-#define ERR_SUM_MAX 5000
-#define ERR_SUM_MIN -5000
+#define ERR_SUM_MAX 1000
+#define ERR_SUM_MIN -1000
 
 void pid_reg3_calc(PIDREG3 *v)
 {

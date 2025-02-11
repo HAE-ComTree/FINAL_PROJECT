@@ -1,0 +1,77 @@
+# Object files
+*.o
+*.obj
+*.elf
+*.map
+*.hex
+*.bin
+*.out
+*.axf
+*.lst
+*.d
+*.srec
+*.a
+*.so
+*.dmp
+*.gcda
+*.gcno
+*.gcov
+*.sym
+
+# 빌드 폴더 (일반적으로 'Build' 또는 'Output' 폴더 사용)
+Build/
+Output/
+Debug/
+Release/
+
+# Makefile 생성 파일
+Makefile
+Makefile.*
+
+# Eclipse 및 Aurix Development Studio 관련 설정 파일
+.settings/
+.metadata/
+*.launch
+*.log
+*.log.*
+*.bak
+*.swp
+*.swo
+*.user
+*.tcl
+*.launches
+
+# 자동 생성된 설정 파일
+*.autosave
+*.bak~
+*.tmp
+*.orig
+
+# 숨김 파일 제외 (macOS, Windows)
+.DS_Store
+Thumbs.db
+desktop.ini
+._*
+
+# Windows 관련 불필요한 파일
+*.lnk
+
+# 개인 설정 파일
+*.workspace
+*.cproject
+*.project
+*.class
+*.pyc
+
+#디버깅 파일
+*.lsl
+*.launch
+
+# 추가적으로 제외할 디렉토리
+Configurations/
+Libraries/
+TriCore Debug (TASKING)/
+
+# 추가적으로 제외할 파일
+Configuration.h
+ConfigurationIsr.h

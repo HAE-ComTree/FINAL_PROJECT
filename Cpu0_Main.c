@@ -37,7 +37,7 @@ int core0_main(void)
     {
         if(CountForStop == 10000000)
         {
-            Car_Change_Direction_Right();
+            //Car_Change_Direction_Right();
         }
 
         if(STM_IT_FLAG == TRUE)

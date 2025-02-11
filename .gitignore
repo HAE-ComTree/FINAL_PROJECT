@@ -7,6 +7,16 @@
 *.bin
 *.out
 *.axf
+*.lst
+*.d
+*.srec
+*.a
+*.so
+*.dmp
+*.gcda
+*.gcno
+*.gcov
+*.sym
 
 # 빌드 폴더 (일반적으로 'Build' 또는 'Output' 폴더 사용)
 Build/
@@ -23,22 +33,32 @@ Makefile.*
 .metadata/
 *.launch
 *.log
+*.log.*
 *.bak
 *.swp
 *.swo
 *.user
+*.tcl
+*.launches
 
 # 자동 생성된 설정 파일
 *.autosave
-*.bak
+*.bak~
 *.tmp
+*.orig
 
 # 숨김 파일 제외 (macOS, Windows)
 .DS_Store
 Thumbs.db
 desktop.ini
+._*
+
+# Windows 관련 불필요한 파일
+*.lnk
 
 # 개인 설정 파일
 *.workspace
 *.cproject
 *.project
+*.class
+*.pyc

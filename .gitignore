@@ -71,6 +71,8 @@ desktop.ini
 Configurations/
 Libraries/
 TriCore Debug (TASKING)/
+.ads/
+
 
 # 추가적으로 제외할 파일
 Configuration.h

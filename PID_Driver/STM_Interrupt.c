@@ -10,11 +10,13 @@
 #define TIMER_INT_TIME          10                             /* Time between interrupts in ms                    */
 #define STM                     &MODULE_STM0                    /* STM0 is used in this example                     */
 
+#define GEAR_RATIO              18.75
+
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
 float32 s_T_samp= 0.001*TIMER_INT_TIME;
-float32 RPM_max = 5000, RPM_min=-5000;
+float32 RPM_max = 300*GEAR_RATIO, RPM_min=-300*GEAR_RATIO;
 float32 RPM_CMD1 = 0;
 float32 RPM_CMD2 = 0;
 sint32 Enc_count_new = 0;
@@ -90,7 +92,7 @@ void PI_Speed_con(void)
     }
     else
     {
-        speed_pid.Ref= - RPM_CMD1;   // speed reference
+        speed_pid.Ref= - RPM_CMD1*GEAR_RATIO;   // speed reference
         speed_pid.Fdb= motor_speed_rpm; // speed measured by ENC
         speed_pid.calc((void *)&speed_pid);   // Calculate speed PID Controller
     }
@@ -107,7 +109,7 @@ void PI_Speed_con_B(void)
     }
     else
     {
-        Motor_B_speed_pid.Ref=RPM_CMD2;   // speed reference
+        Motor_B_speed_pid.Ref=RPM_CMD2*GEAR_RATIO;   // speed reference
         Motor_B_speed_pid.Fdb= Motor_B_motor_speed_rpm; // speed measured by ENC
         Motor_B_speed_pid.calc((void *)&Motor_B_speed_pid);   // Calculate speed PID Controller
     }

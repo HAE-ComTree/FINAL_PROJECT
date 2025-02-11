@@ -110,7 +110,8 @@ void initIncrEnc(void)
 void Encoder_update(void)
 {
     IfxGpt12_IncrEnc_update(&gpt12);
-    speed = IfxGpt12_IncrEnc_getSpeed(&gpt12);
-    rawPosition = IfxGpt12_IncrEnc_getRawPosition(&gpt12);
-    direction = IfxGpt12_IncrEnc_getDirection(&gpt12);
+    IfxGpt12_IncrEnc_update(&Motor_B_gpt12);
+    //    speed = IfxGpt12_IncrEnc_getSpeed(&gpt12);
+//    rawPosition = IfxGpt12_IncrEnc_getRawPosition(&gpt12);
+//    direction = IfxGpt12_IncrEnc_getDirection(&gpt12);
 }

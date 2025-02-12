@@ -110,10 +110,10 @@ void Set_Turn(Direction direction, float32 turn_angle)
 
 float32 getCurrentSpeed(void)
 {
-    float32 MotorA_Current_RPM_Multiplied_By_Ratio = motor_speed_rpm;
+    float32 MotorA_Current_RPM_Multiplied_By_Ratio = - motor_speed_rpm;
     float32 MotorB_Current_RPM_Multiplied_By_Ratio = Motor_B_motor_speed_rpm;
 
-    float32 MotorA_Current_RPM = - MotorA_Current_RPM_Multiplied_By_Ratio / GEAR_RATIO;
+    float32 MotorA_Current_RPM = MotorA_Current_RPM_Multiplied_By_Ratio / GEAR_RATIO;
     float32 MotorB_Current_RPM = MotorB_Current_RPM_Multiplied_By_Ratio / GEAR_RATIO;
 
     float32 Current_RPM_AVG = (MotorA_Current_RPM + MotorB_Current_RPM) / 2.0f;

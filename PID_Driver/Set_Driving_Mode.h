@@ -34,7 +34,7 @@ typedef enum Direction_T
 /*********************************************************************************************************************/
 void Set_Stop_Gradually(void);
 void Set_Target_Speed(float32 targetSpeed);
-void Set_Turn(Direction direction, float turn_angle);
+void Set_Turn(Direction direction, float32 turn_angle);
 float32 getCurrentSpeed(void);
 void delay_ms(uint32 ms);
 

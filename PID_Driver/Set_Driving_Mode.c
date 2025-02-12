@@ -6,11 +6,14 @@
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
-#define STM          &MODULE_STM1
-#define WHEEL_RADIUS 0.0325f  // 바퀴 반지름 (단위: m)
-#define WHEEL_BASE   0.2f //휠 베이스 : 0.2m
-#define MIN_RADIUS   WHEEL_BASE*1.2f //최소회전반경 : 휠베이스 * 1.2
-#define MAX_RADIUS   WHEEL_BASE*5.0f //최대회전반경 : 휠베이스 * 5
+#define STM                     &MODULE_STM1
+#define WHEEL_RADIUS            0.0325f  // 바퀴 반지름 (단위: m)
+#define WHEEL_BASE              0.2f //휠 베이스 : 0.2m
+#define MIN_RADIUS              WHEEL_BASE*1.2f //최소회전반경 : 휠베이스 * 1.2
+#define MAX_RADIUS              WHEEL_BASE*5.0f //최대회전반경 : 휠베이스 * 5
+#define Maximum_RPM             300
+#define Minimum_RPM             -300
+#define GEAR_RATIO              18.75
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
@@ -57,20 +60,20 @@ void Set_Target_Speed(float32 targetSpeed)//단위 : m/s
 {
     float32 caculatedRPM = (targetSpeed * 60.0f)/(2.0f * 3.14159f * WHEEL_RADIUS);
 
-    if(caculatedRPM > RPM_max)
+    if(caculatedRPM > Maximum_RPM)
     {
-        caculatedRPM = RPM_max;
+        caculatedRPM = Maximum_RPM;
     }
-    else if(caculatedRPM < RPM_min)
+    else if(caculatedRPM < Minimum_RPM)
     {
-        caculatedRPM = RPM_min;
+        caculatedRPM = Minimum_RPM;
     }
 
     RPM_CMD1 = caculatedRPM;
     RPM_CMD2 = caculatedRPM;
 }
 
-void Set_Turn(Direction direction, float turn_angle)
+void Set_Turn(Direction direction, float32 turn_angle)
 {
     float32 TurnRadius = MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * (turn_angle / 180.0f); //각도에 따른 회전반경 계산, turn_angle을 0~1로 정규화
     float32 Base_Speed = 0;
@@ -107,8 +110,14 @@ void Set_Turn(Direction direction, float turn_angle)
 
 float32 getCurrentSpeed(void)
 {
-    float32 RPM_AVG = (RPM_CMD1 + RPM_CMD2) / 2.0f;
-    float32 BASE_SPEED = (RPM_AVG * 2 * 3.14159 * WHEEL_RADIUS) / 60.0f;
+    float32 MotorA_Current_RPM_Multiplied_By_Ratio = motor_speed_rpm;
+    float32 MotorB_Current_RPM_Multiplied_By_Ratio = Motor_B_motor_speed_rpm;
+
+    float32 MotorA_Current_RPM = - MotorA_Current_RPM_Multiplied_By_Ratio / GEAR_RATIO;
+    float32 MotorB_Current_RPM = MotorB_Current_RPM_Multiplied_By_Ratio / GEAR_RATIO;
+
+    float32 Current_RPM_AVG = (MotorA_Current_RPM + MotorB_Current_RPM) / 2.0f;
+    float32 BASE_SPEED = (Current_RPM_AVG * 2 * 3.14159 * WHEEL_RADIUS) / 60.0f;
 
     return BASE_SPEED;
 }

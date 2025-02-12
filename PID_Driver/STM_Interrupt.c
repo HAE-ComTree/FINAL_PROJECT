@@ -31,9 +31,10 @@ float32 Motor_B_motor_speed_rpm=0;
 sint32 i1 = 0;
 PIDREG3 speed_pid = PIDREG3_DEFAULTS;
 PIDREG3 Motor_B_speed_pid = PIDREG3_DEFAULTS;
-volatile float32 Kp_s=2,Ki_s=0.2,Kd_s=0;
+volatile float32 Kp_s=0.0822,Ki_s=3.1004,Kd_s=0;
 boolean STM_IT_FLAG = FALSE;
 IfxStm_CompareConfig g_STMConf;
+
 Ifx_TickTime g_ticksFor5ms;;
 
 /*********************************************************************************************************************/

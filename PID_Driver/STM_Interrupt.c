@@ -9,14 +9,15 @@
 #define ISR_PRIORITY_STM        40                              /* Priority for interrupt ISR                       */
 #define TIMER_INT_TIME          5                             /* Time between interrupts in ms                    */
 #define STM                     &MODULE_STM0                    /* STM0 is used in this example                     */
-
 #define GEAR_RATIO              18.75
-
+#define Maximum_RPM             300
+#define Minimum_RPM             -300
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
 float32 s_T_samp= 0.001*TIMER_INT_TIME;
-float32 RPM_max = 300*GEAR_RATIO, RPM_min=-300*GEAR_RATIO;
+float32 Maximum_RPM_multiplied_by_reduction_ratio = Maximum_RPM * GEAR_RATIO;
+float32 Minimum_RPM_multiplied_by_reduction_ratio = Minimum_RPM * GEAR_RATIO;
 float32 RPM_CMD1 = 0;
 float32 RPM_CMD2 = 0;
 sint32 Enc_count_new = 0;
@@ -68,16 +69,16 @@ void PI_const_update(void)
     speed_pid.Kd = Kd_s;
     speed_pid.Kc = 1/Kp_s;
     speed_pid.T_samp = s_T_samp;
-    speed_pid.OutMax = RPM_max;
-    speed_pid.OutMin = RPM_min;
+    speed_pid.OutMax = Maximum_RPM_multiplied_by_reduction_ratio;
+    speed_pid.OutMin = Minimum_RPM_multiplied_by_reduction_ratio;
 
     Motor_B_speed_pid.Kp = Kp_s;
     Motor_B_speed_pid.Ki = Ki_s;
     Motor_B_speed_pid.Kd = Kd_s;
     Motor_B_speed_pid.Kc = 1/Kp_s;
     Motor_B_speed_pid.T_samp = s_T_samp;
-    Motor_B_speed_pid.OutMax = RPM_max;
-    Motor_B_speed_pid.OutMin = RPM_min;
+    Motor_B_speed_pid.OutMax = Maximum_RPM_multiplied_by_reduction_ratio;
+    Motor_B_speed_pid.OutMin = Minimum_RPM_multiplied_by_reduction_ratio;
 }
 
 void PI_Speed_con(void)

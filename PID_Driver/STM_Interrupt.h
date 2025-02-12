@@ -22,8 +22,10 @@
 /*********************************************************************************************************************/
 extern float32 RPM_CMD1;
 extern float32 RPM_CMD2;
-extern float32 RPM_max;
-extern float32 RPM_min;
+extern float32 Maximum_RPM_multiplied_by_reduction_ratio;
+extern float32 Minimum_RPM_multiplied_by_reduction_ratio;
+extern float32 motor_speed_rpm;
+extern float32 Motor_B_motor_speed_rpm;
 extern IfxGpt12_IncrEnc_Config gpt12Config;
 extern IfxGpt12_IncrEnc_Config Motor_B_gpt12Config;
 extern uint8 CPR;

@@ -18,7 +18,7 @@
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
-
+float32 CurrentTargetSpeed = 0;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -32,12 +32,12 @@
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
-void Set_Stop_Gradually(void)
+void Set_Stop(void)
 {
     while(RPM_CMD1 > 0 || RPM_CMD2 > 0)
     {
-        RPM_CMD1 -= 50;
-        RPM_CMD2 -= 50;
+        RPM_CMD1 -= 5;
+        RPM_CMD2 -= 5;
 
         if(RPM_CMD1 < 0)
         {
@@ -49,17 +49,24 @@ void Set_Stop_Gradually(void)
             RPM_CMD2 = 0;
         }
 
-        delay_ms(100);
+        //delay_ms(100);
     }
 
     setMotorControl(0, 0);
     setMotor_B_Control(0, 0);
 }
 
-void Set_Target_Speed(float32 targetSpeed)//단위 : m/s
+void setTargetSpeed(float32 targetSpeed)
 {
-    float32 caculatedRPM = (targetSpeed * 60.0f)/(2.0f * 3.14159f * WHEEL_RADIUS);
+    CurrentTargetSpeed = targetSpeed;
+}
 
+void Adjust_To_Target_Speed(void)//단위 : m/s
+{
+    float32 caculatedRPM = (CurrentTargetSpeed * 60.0f)/(2.0f * 3.14159f * WHEEL_RADIUS);
+    float32 rampRate = 5.0f;
+
+    //목표 RPM 계산
     if(caculatedRPM > Maximum_RPM)
     {
         caculatedRPM = Maximum_RPM;
@@ -69,8 +76,21 @@ void Set_Target_Speed(float32 targetSpeed)//단위 : m/s
         caculatedRPM = Minimum_RPM;
     }
 
-    RPM_CMD1 = caculatedRPM;
-    RPM_CMD2 = caculatedRPM;
+    //목표 RPM을 점진적으로 변경
+    if (RPM_CMD1 < caculatedRPM)
+    {
+        RPM_CMD1 += rampRate;
+        if (RPM_CMD1 > caculatedRPM) // 목표치를 초과하지 않도록 보정
+            RPM_CMD1 = caculatedRPM;
+    }
+    else if (RPM_CMD1 > caculatedRPM)
+    {
+        RPM_CMD1 -= rampRate;
+        if (RPM_CMD1 < caculatedRPM) // 목표치를 초과하지 않도록 보정
+            RPM_CMD1 = caculatedRPM;
+    }
+
+    RPM_CMD2 = RPM_CMD1;
 }
 
 void Set_Turn(Direction direction, float32 turn_angle)

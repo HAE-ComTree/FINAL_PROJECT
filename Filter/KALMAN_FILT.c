@@ -77,11 +77,10 @@ float32_t kalman_update(KalmanFilter *kf, float32_t z) {
     kf->P = (1.0F - K) * P_pred;                            //covariance update
     kfRESULT = kf->X;
 
-    get_kalman_val(kfRESULT);
     return kfRESULT;
 }
 
-uint32_t get_kalman_val(float32_t kfr){
-    return (uint32_t)kfr;
+uint32_t get_kalman_val(void){
+    return (uint32_t)kfRESULT;
 }
 

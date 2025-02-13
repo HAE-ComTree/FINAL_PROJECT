@@ -58,6 +58,6 @@
 /*********************************************************************************************************************/
 void kalman_init(KalmanFilter*, float32_t);
 float32_t kalman_update(KalmanFilter*, float32_t);
-uint32_t get_kalman_val(float32_t);
+uint32_t get_kalman_val(void);
 
 #endif /* DRV_KALMAN_FILT_H_ */

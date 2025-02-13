@@ -31,14 +31,16 @@ void pid_reg3_calc(PIDREG3 *v)
     } else if (v->ErrSum < ERR_SUM_MIN) {
         v->ErrSum = ERR_SUM_MIN;
     }
+
     v->Ui = v->Ki * v->ErrSum;
 
 
     v->Ud = v->Kd / v->T_samp * (v->Err - v->Err_1) ;
-//    v->Ui = v->Ki * v->T_samp * (0.5 * v->Err + v->ErrSum) - v->Kc * v->SatErr ;
+
+    //    v->Ui = v->Ki * v->T_samp * (0.5 * v->Err + v->ErrSum) - v->Kc * v->SatErr ;
 
     // Compute the pre-saturated output
-    v->Out = v->Up + v->Ui + v->Ud;
+    v->Out = v->Up + v->Ui;
 
 
      if (v->Out > v->OutMax)

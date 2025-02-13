@@ -7,8 +7,8 @@
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
 #define STM                     &MODULE_STM1
-#define WHEEL_RADIUS            0.0325f  // 바퀴 반지름 (단위: m)
-#define WHEEL_BASE              0.2f //휠 베이스 : 0.2m
+#define WHEEL_RADIUS            32.5f  // 바퀴 반지름 (단위: mm)
+#define WHEEL_BASE              190.0f //휠 베이스 : 190mm
 #define MIN_RADIUS              WHEEL_BASE*1.2f //최소회전반경 : 휠베이스 * 1.2
 #define MAX_RADIUS              WHEEL_BASE*5.0f //최대회전반경 : 휠베이스 * 5
 #define Maximum_RPM             300

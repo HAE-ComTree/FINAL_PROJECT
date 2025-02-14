@@ -8,9 +8,9 @@
 #define STM1                           &MODULE_STM1
 #define ISR_PRIORITY_FCA_STM           50
 #define FCA_TIME_INTERVAL              100 //단위 : ms
-#define Safety_Distance                150 //단위 : mm
+#define Safety_Distance                150 //단위 : mm, 감속 시작 거리 450
 #define MAX_SPEED                      300
-#define MIN_SPEED                      0
+#define MIN_SPEED                      70
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
@@ -54,6 +54,7 @@ void performFCA(void)
     float32 Kp_FCA = 1.0f;
     float32 targetSpeed = 0;
 
+    //거리에 따른 속도 제어
     if(Front_Distance > Safety_Distance)
     {
         targetSpeed = Kp_FCA * (Front_Distance - Safety_Distance);
@@ -63,11 +64,12 @@ void performFCA(void)
         targetSpeed = 0;
     }
 
+    //최대속도, 최소속도 설정
     if(targetSpeed > MAX_SPEED)
     {
         targetSpeed = MAX_SPEED;
     }
-    else if(targetSpeed < MIN_SPEED)
+    else if(Front_Distance > Safety_Distance && targetSpeed < MIN_SPEED)
     {
         targetSpeed = MIN_SPEED;
     }

@@ -77,3 +77,5 @@ void performFCA(void)
     FCA_IT_FLAG = FALSE;
     IfxStm_increaseCompare(STM1, FCA_STMConf.comparator, (uint32)g_ticksFor100ms);
 }
+
+//test commit

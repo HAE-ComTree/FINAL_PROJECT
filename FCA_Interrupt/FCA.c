@@ -8,7 +8,7 @@
 #define STM1                           &MODULE_STM1
 #define ISR_PRIORITY_FCA_STM           50
 #define FCA_TIME_INTERVAL              100 //단위 : ms
-#define Safety_Distance                300 //단위 : mm
+#define Safety_Distance                150 //단위 : mm
 #define MAX_SPEED                      300
 #define MIN_SPEED                      0
 

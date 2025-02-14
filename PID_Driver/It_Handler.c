@@ -28,6 +28,7 @@ void Enc_10ms_Handler(void)
 {
     Reach_To_Target_Speed();
     BASE_SPEED = getCurrentSpeed(); //TODO : 추후 삭제
+
     RPM_cal();
 
     static sint32 ii =0;

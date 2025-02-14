@@ -61,7 +61,7 @@ void setTargetSpeed(float32 targetSpeed)
     CurrentTargetSpeed = targetSpeed;
 }
 
-void Adjust_To_Target_Speed(void)//단위 : m/s
+void Reach_To_Target_Speed(void)//단위 : mm/s
 {
     float32 caculatedRPM = (CurrentTargetSpeed * 60.0f)/(2.0f * 3.14159f * WHEEL_RADIUS);
     float32 rampRate = 5.0f;

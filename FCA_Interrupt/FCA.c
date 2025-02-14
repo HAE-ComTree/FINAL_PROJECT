@@ -9,8 +9,9 @@
 #define ISR_PRIORITY_FCA_STM           50
 #define FCA_TIME_INTERVAL              100 //단위 : ms
 #define Safety_Distance                150 //단위 : mm, 감속 시작 거리 450
-#define MAX_SPEED                      300
+#define MAX_SPEED                      900
 #define MIN_SPEED                      70
+#define SUDDEN_STOP_THRESHOLD          150 //단위 : mm
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
@@ -18,6 +19,7 @@
 IfxStm_CompareConfig FCA_STMConf;
 Ifx_TickTime g_ticksFor100ms;
 boolean FCA_IT_FLAG = FALSE;
+float32 distanceChange = 0;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -50,12 +52,22 @@ void initFCASTM(void)
 
 void performFCA(void)
 {
-    uint32_t Front_Distance = get_kalman_val();
-    float32 Kp_FCA = 1.0f;
+    float32 Kp_FCA = 0.95f;
     float32 targetSpeed = 0;
+    static float32 preDistance = 0;
+    //float32 distanceChange = 0;
 
-    //거리에 따른 속도 제어
-    if(Front_Distance > Safety_Distance)
+    uint32_t Front_Distance = get_kalman_val();
+
+    distanceChange = Front_Distance - preDistance;
+
+    if(distanceChange < -SUDDEN_STOP_THRESHOLD) //급정거
+    {
+        //TODO : 급정거 로직 구현
+        RPM_CMD1 = -RPM_CMD1;
+        RPM_CMD2 = -RPM_CMD2;
+    }
+    else if(Front_Distance > Safety_Distance) //거리에 따른 속도 제어
     {
         targetSpeed = Kp_FCA * (Front_Distance - Safety_Distance);
     }
@@ -75,6 +87,8 @@ void performFCA(void)
     }
 
     setTargetSpeed(targetSpeed);
+
+    preDistance = Front_Distance;
 
     FCA_IT_FLAG = FALSE;
     IfxStm_increaseCompare(STM1, FCA_STMConf.comparator, (uint32)g_ticksFor100ms);

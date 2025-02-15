@@ -61,9 +61,8 @@ void performFCA(void)
 
     distanceChange = Front_Distance - preDistance;
 
-    if(distanceChange < -SUDDEN_STOP_THRESHOLD) //급정거
+    if(distanceChange < -SUDDEN_STOP_THRESHOLD && Front_Distance < Safety_Distance) //급정거
     {
-        //TODO : 급정거 로직 구현
         RPM_CMD1 = -RPM_CMD1;
         RPM_CMD2 = -RPM_CMD2;
     }

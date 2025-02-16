@@ -31,7 +31,10 @@
 
 #include "Ultrasonic.h"
 #include "GTM_TIM_Capture.h"
+#include "ERR_CALC.h"
+#include "ULTRA_FILT.h"
 
+#include "string.h"
 #include "Ifx_reg.h"
 
 /*********************************************************************************************************************/
@@ -41,7 +44,15 @@
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
+uint32_t count = 0;
+uint32_t dist = 0;
+float32_t b_distance;
 
+
+float32_t kmr = 0.0;
+int cct = 0;
+
+UKFilter ukf;
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
@@ -51,18 +62,21 @@ void Init_Ultrasonics(void)
 	init_TIM();
 	side_TIM();
     /* Send Trigger Pulse */
-    generate_PWM();
+    //generate_PWM();
 }
 
 double ReadUltrasonic_noFilt(void)
 {
 	float32_t b_duration;
-	float32_t b_distance;
 
 	/* Calculate Distance */
 	b_duration = measure_PWM();
-	b_distance = 0.0343 * b_duration / 2.0; // cm/us
-	mov_AVG_Filter(b_distance, SENSOR_REAR);
+	b_distance = 0.0343 * b_duration / 0.2;
+	if(!isnan(b_distance) && b_distance > 0.0) {
+	    if(b_distance < 50.0){b_distance = 50.0;}
+
+        median_filter(b_distance, b_duration);
+	}
 
 	return b_distance;
 }
@@ -73,7 +87,10 @@ double SideUltrasonic_noFilt(void) {
 
     s_duration = side_PWM();
     s_distance = 0.0343 * s_duration / 2.0;
-    mov_AVG_Filter(s_distance, SENSOR_SIDE);
 
     return s_distance;
+}
+
+uint32_t get_Ultrasonic_val(void){
+    return dist;
 }

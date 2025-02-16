@@ -38,6 +38,7 @@
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
+#define THR 1000.0F
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
@@ -49,6 +50,7 @@ uint8 g_buf_tof[16] = { 0 };
 IfxAsclin_Asc g_asclin1;
 const uint8 g_tof_length = 16;
 uint32_t tof_distance = 0;
+float32_t tof_noise = 0.0;
 
 KFilter kaf;
 uint8_t initFlag = 0;
@@ -186,13 +188,19 @@ uint32 get_tof_distance(void)
     }
 
     if(tof_distance != 0) {
-        if(initFlag == 0){
-            initFlag = 1;
-            kalman_init(&kaf, (float32_t)tof_distance);
-        } else {
-            if(tof_distance == 0) initFlag = 0;
+        float32_t prev_distance = 0.0F;
+        if(tof_distance <= 1000) {tof_noise = 9.0F;}
+        else if (tof_distance > 6500) {tof_noise = 250.0F;}
+        else {tof_noise = 90.0F;}
+
+        if (fabsf(tof_distance - prev_distance) > THR) {
+            initFlag = 0;
         }
 
+        if(initFlag == 0){
+            initFlag = 1;
+            kalman_init(&kaf, (float32_t)tof_distance, tof_noise);
+        }
         kalman_update(&kaf, (float32_t)tof_distance);
     }
 

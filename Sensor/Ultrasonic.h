@@ -5,7 +5,7 @@
 void Init_Ultrasonics(void);
 double ReadUltrasonic_noFilt(void);
 double SideUltrasonic_noFilt(void);
-double ReadUltrasonic_Filt(void);
+uint32_t get_Ultrasonic_val(void);
 
 #define FILT_SIZE 5
 

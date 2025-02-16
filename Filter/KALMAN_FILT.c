@@ -30,7 +30,7 @@
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
 #include "KALMAN_FILT.h"
-#include "string.h"
+#include "ASCLIN_UART.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
@@ -39,7 +39,7 @@
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
-static float32_t kfRESULT;
+float32_t kfRESULT = 0;
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
 /*********************************************************************************************************************/
@@ -51,23 +51,16 @@ static float32_t kfRESULT;
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
-KFilter kf;
+KalmanFilter kf;
 
-void kalman_init(KFilter *kf, float32_t initial_x) {
-    float32_t m_noise = 0;                                  // m_noise is square of sensor's standard deviation
-    kfRESULT = 0.0;
-
-    if(initial_x <= 1000) {m_noise = 9.0F;}
-    else if (initial_x > 6500) {m_noise = 2500.0F;}
-    else {m_noise = 900.0F;}
-
+void kalman_init(KalmanFilter *kf, float32_t initial_x, float32_t m_noise) {
     kf->X = initial_x;                                      // initial position
     kf->P = 1000.0F;                                        // initial uncertainty
-    kf->Q = 0.01F;                                          // sensor process noise(uncertainty of estimated value)
+    kf->Q = 0.005F;                                          // sensor process noise(uncertainty of estimated value)
     kf->R = m_noise;                                        // measurement noise
 }
 
-void kalman_update(KFilter *kf, float32_t z) {
+float32_t kalman_update(KalmanFilter *kf, float32_t z) {
     // predict step
     float32_t X_pred = kf->X;                               // position predict
     float32_t P_pred = kf->P + kf->Q;                       // covariance predict
@@ -80,8 +73,5 @@ void kalman_update(KFilter *kf, float32_t z) {
     kf->P = (1.0F - K) * P_pred;                            //covariance update
     kfRESULT = kf->X;
 
-}
-
-uint32_t get_kalman_val(void){
-    return (uint32_t)kfRESULT;
+    return kfRESULT;
 }

@@ -31,15 +31,19 @@
 
 #include "IfxGtm_Tim_In.h"
 #include "IfxGtm_Tom_Pwm.h"
+#include "IfxGtm_Atom_Pwm.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
-#define PWM_OUT         IfxGtm_TOM0_9_TOUT10_P00_1_OUT  /* Port pin which is driven by the PWM                      */
-#define PWM_IN          IfxGtm_TIM2_3_TIN60_P20_1_IN     /* Input port pin for the PWM signal                        */
+#define PWM_OUT         IfxGtm_ATOM1_1_TOUT10_P00_1_OUT  /* Port pin which is driven by the PWM                      */
+#define PWM_IN          IfxGtm_TIM2_5_TIN15_P00_6_IN     /* Input port pin for the PWM signal                        */
 #define SIDE_PWM_IN     IfxGtm_TIM2_4_TIN14_P00_5_IN
-#define PWM_PERIOD      10000                           /* PWM signal period for the TOM                            */
-#define DUTY_CYCLE      PWM_PERIOD / 10                  /* PWM signal duty cycle for the TOM                        */
+
+#define CLK_FREQ        1000000.0f                          /* CMU clock frequency, in Hertz                         */
+#define ULT_PWM_PERIOD  100000                               /* PWM period for the ATOM, in ticks                    */
+#define DUTY_CYCLE      ULT_PWM_PERIOD/2000                 /* PWM signal duty cycle for the TOM                     */
+
 
 #define secTous 1000000
 
@@ -61,6 +65,8 @@ IfxGtm_Tim_In s_driverTIM;
 boolean s_dataCoherent = FALSE;
 float32_t s_pwm_period_us;
 float32_t s_pwm_sec_us;
+
+
 
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
@@ -95,22 +101,26 @@ void side_TIM(void){
 /* Initialization of the TOM and generation of a PWM signal */
 void generate_PWM(void)
 {
-    IfxGtm_Tom_Pwm_Config tomConfig;                                    /* Timer configuration structure            */
-    IfxGtm_Tom_Pwm_Driver tomDriver;                                    /* Timer driver structure                   */
-    IfxGtm_Cmu_enableClocks(&MODULE_GTM, IFXGTM_CMU_CLKEN_FXCLK);       /* Enable the FXU clocks                    */
+    IfxGtm_Atom_Pwm_Config u_atomConfig;
+    IfxGtm_Atom_Pwm_Driver u_atomDriver;
 
-    IfxGtm_Tom_Pwm_initConfig(&tomConfig, &MODULE_GTM);                 /* Initialize default parameters            */
+    IfxGtm_enable(&MODULE_GTM);                                             /* Enable GTM                           */
 
-    tomConfig.tom = PWM_OUT.tom;                                        /* Select the TOM                           */
-    tomConfig.tomChannel = PWM_OUT.channel;                             /* Select the channel                       */
-    tomConfig.period = PWM_PERIOD;                                      /* Set timer period                         */
-    tomConfig.dutyCycle = DUTY_CYCLE;                                   /* Set the duty cycle                       */
-    tomConfig.pin.outputPin = &PWM_OUT;                                 /* Set the pin as output                    */
-    tomConfig.synchronousUpdateEnabled = TRUE;                          /* Enable synchronous update                */
-    tomConfig.clock = IfxGtm_Tom_Ch_ClkSrc_cmuFxclk1;                   /* Select the FXU clock 1                   */
+    IfxGtm_Cmu_setClkFrequency(&MODULE_GTM, IfxGtm_Cmu_Clk_0, CLK_FREQ);    /* Set the CMU clock 0 frequency        */
+    IfxGtm_Cmu_enableClocks(&MODULE_GTM, IFXGTM_CMU_CLKEN_CLK0);            /* Enable the CMU clock 0               */
 
-    IfxGtm_Tom_Pwm_init(&tomDriver, &tomConfig);                        /* Initialize the module                    */
-    IfxGtm_Tom_Pwm_start(&tomDriver, TRUE);                             /* Start the generation of the PWM signal   */
+    IfxGtm_Atom_Pwm_initConfig(&u_atomConfig, &MODULE_GTM);                 /* Initialize default parameters        */
+
+    u_atomConfig.atom = PWM_OUT.atom;                                         /* Select the ATOM depending on the LED     */
+    u_atomConfig.atomChannel = PWM_OUT.channel;                               /* Select the channel depending on the LED  */
+    u_atomConfig.period = ULT_PWM_PERIOD;                                 /* Set timer period                         */
+    u_atomConfig.pin.outputPin = &PWM_OUT;                                    /* Set LED as output                        */
+    u_atomConfig.synchronousUpdateEnabled = TRUE;                           /* Enable synchronous update                */
+    u_atomConfig.dutyCycle = DUTY_CYCLE;
+
+    IfxGtm_Atom_Pwm_init(&u_atomDriver, &u_atomConfig);                     /* Initialize the PWM                       */
+    IfxGtm_Atom_Pwm_start(&u_atomDriver, TRUE);                             /* Start the PWM                            */
+
 }
 
 /* This function measures the period, the frequency and the duty cycle of the PWM signal */

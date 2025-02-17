@@ -1,15 +1,13 @@
-#ifndef FCA_INTERRUPT_FCA_H_
-#define FCA_INTERRUPT_FCA_H_
+#ifndef LANE_CHANGE_LANE_CHANGE_H_
+#define LANE_CHANGE_LANE_CHANGE_H_
 
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
-#include "Ifx_Types.h"
-#include "IfxStm.h"
-#include "Bsp.h"
-#include "KALMAN_FILT.h"
 #include "Set_Driving_Mode.h"
-#include "STM_Interrupt.h"
+#include "Ifx_Types.h"
+#include "math.h"
+#include "IfxStm.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
@@ -18,7 +16,10 @@
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
-extern boolean FCA_IT_FLAG;
+extern int T1_rotation_flag;
+extern boolean T2_straight_flag;
+extern boolean T3_rotation_flag;
+extern boolean T3_rotation_end_flag;
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Data Structures---------------------------------------------------*/
@@ -31,8 +32,17 @@ extern boolean FCA_IT_FLAG;
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
-void isrFCA(void);
-void initFCASTM(void);
-void performFCA(void);
+void T1_rotation_Right(void);
+void T2_straight(void);
+void T3_rotation_left(void);
+void lc_final_procedure(void);
+void isr_lc_T1_stm(void);
+void isr_lc_T2_stm(void);
+void isr_lc_T3_stm(void);
+void init_lc_T1_STM_IT(float32 rotation_time_T1);
+void init_lc_T2_STM_IT(float32 travel_time_T2);
+void init_lc_T3_STM_IT(float32 rotation_time_T3);
+void AdjustRPMDown(void);
+float32 calculate_T2_time(void);
 
-#endif /* FCA_INTERRUPT_FCA_H_ */
+#endif /* LANE_CHANGE_LANE_CHANGE_H_ */

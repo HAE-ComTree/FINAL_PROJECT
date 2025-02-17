@@ -1,14 +1,14 @@
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
-#include "Set_Driving_Mode.h"
+#include <Set_Driving_Mode.h>
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
 #define STM                     &MODULE_STM1
 #define WHEEL_RADIUS            32.5f  // 바퀴 반지름 (단위: mm)
-#define WHEEL_BASE              190.0f //휠 베이스 : 190mm
+#define WHEEL_BASE              180.0f //휠 베이스 : 190mm
 #define MIN_RADIUS              WHEEL_BASE*1.2f //최소회전반경 : 휠베이스 * 1.2
 #define MAX_RADIUS              WHEEL_BASE*5.0f //최대회전반경 : 휠베이스 * 5
 #define Maximum_RPM             300
@@ -93,9 +93,9 @@ void Reach_To_Target_Speed(void)//단위 : mm/s
     RPM_CMD2 = RPM_CMD1;
 }
 
-void Set_Turn(Direction direction, float32 turn_angle)
+float32 set_turn(Direction direction, float32 angular_velocity)
 {
-    float32 TurnRadius = MIN_RADIUS + (MAX_RADIUS - MIN_RADIUS) * (turn_angle / 180.0f); //각도에 따른 회전반경 계산, turn_angle을 0~1로 정규화
+    float32 turn_radius = 0;
     float32 Base_Speed = 0;
     float32 innerWheelSpeed = 0;
     float32 outerWheelSpeed = 0;
@@ -104,17 +104,14 @@ void Set_Turn(Direction direction, float32 turn_angle)
 
     Base_Speed = getCurrentSpeed(); //RPM_CMD1, RPM_CMD2의 평균으로 현재 속도를 계산
 
-    //바깥쪽 바퀴 속도 : 현재 속도 * (회전반경 + 휠베이스/2)/회전 반경
-    //안쪽 바퀴 속도 : 현재 속도 * (회전반경 - 휠베이스/2)/회전반경
-    innerWheelSpeed = Base_Speed * (TurnRadius - WHEEL_BASE/2)/TurnRadius;
-    outerWheelSpeed = Base_Speed * (TurnRadius + WHEEL_BASE/2)/TurnRadius;
+    turn_radius = Base_Speed / angular_velocity;
+
+    innerWheelSpeed = angular_velocity * (turn_radius - WHEEL_BASE/2);
+    outerWheelSpeed = angular_velocity * (turn_radius + WHEEL_BASE/2);
 
     //휠 속도를 RPM으로 변환
     innerRPM = (innerWheelSpeed * 60.0f)/(2.0f*3.14159f*WHEEL_RADIUS);
     outerRPM = (outerWheelSpeed * 60.0f)/(2.0f*3.14159f*WHEEL_RADIUS);
-
-    if(innerRPM > 300) innerRPM = 300;
-    if(outerRPM > 300) outerRPM = 300;
 
     if(direction == Right)//오른쪽
     {
@@ -126,6 +123,8 @@ void Set_Turn(Direction direction, float32 turn_angle)
         RPM_CMD1 = innerRPM;
         RPM_CMD2 = outerRPM;
     }
+
+    return turn_radius;
 }
 
 float32 getCurrentSpeed(void)

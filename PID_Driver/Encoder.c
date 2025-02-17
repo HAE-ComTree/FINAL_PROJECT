@@ -8,7 +8,7 @@
 /*********************************************************************************************************************/
 // 엔코더 설정
 #define PULSES_PER_REV 330     // 한 채널당 펄스 수
-const uint8 CPR = (PULSES_PER_REV * 4);  // 4체배시 한바퀴 펄스 수
+const uint32 CPR = (PULSES_PER_REV * 4);  // 4체배시 한바퀴 펄스 수
 
 // Interrupt priority definitions
 #define ISR_PRIORITY_INCRENC_ZERO 6

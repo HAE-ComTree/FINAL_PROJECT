@@ -20,6 +20,8 @@ IfxStm_CompareConfig FCA_STMConf;
 Ifx_TickTime g_ticksFor100ms;
 boolean FCA_IT_FLAG = FALSE;
 uint32_t distanceChange = 0;
+boolean FCA_ENABLE_FLAG = TRUE;
+uint32_t Front_Distance;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -52,12 +54,14 @@ void initFCASTM(void)
 
 void performFCA(void)
 {
+    FCA_IT_FLAG = FALSE;
+
     float32 Kp_FCA = 0.95f;
     float32 targetSpeed = 0;
     static uint32_t preDistance = 0;
     //float32 distanceChange = 0;
 
-    uint32_t Front_Distance = get_kalman_val();
+    Front_Distance = get_kalman_val();
 
     distanceChange = Front_Distance - preDistance;
 
@@ -89,6 +93,6 @@ void performFCA(void)
 
     preDistance = Front_Distance;
 
-    FCA_IT_FLAG = FALSE;
+
     IfxStm_increaseCompare(STM1, FCA_STMConf.comparator, (uint32)g_ticksFor100ms);
 }

@@ -7,6 +7,7 @@
 #include "STM_Interrupt.h"
 #include "IfxStm.h"
 #include "Platform_Types.h"
+#include "math.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
@@ -37,7 +38,7 @@ extern float32 CurrentTargetSpeed;
 void Set_Stop(void);
 void setTargetSpeed(float32 targetSpeed);
 void Reach_To_Target_Speed(void);
-float32 set_turn(Direction direction, float32 turn_angle);
+float32 set_turn(Direction direction, float32 target_angle);
 float32 getCurrentSpeed(void);
 void delay_ms(uint32 ms);
 

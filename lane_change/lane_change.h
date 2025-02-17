@@ -5,6 +5,7 @@
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
 #include "Set_Driving_Mode.h"
+#include "FCA.h"
 #include "Ifx_Types.h"
 #include "math.h"
 #include "IfxStm.h"
@@ -42,7 +43,7 @@ void isr_lc_T3_stm(void);
 void init_lc_T1_STM_IT(float32 rotation_time_T1);
 void init_lc_T2_STM_IT(float32 travel_time_T2);
 void init_lc_T3_STM_IT(float32 rotation_time_T3);
-void AdjustRPMDown(void);
+void adjust_RPM_equal(void);
 float32 calculate_T2_time(void);
 
 #endif /* LANE_CHANGE_LANE_CHANGE_H_ */

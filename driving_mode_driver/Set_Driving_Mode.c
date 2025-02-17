@@ -19,6 +19,7 @@
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
 float32 CurrentTargetSpeed = 0;
+static const float32 CAR_LENGTH = 135.0f;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -93,7 +94,7 @@ void Reach_To_Target_Speed(void)//단위 : mm/s
     RPM_CMD2 = RPM_CMD1;
 }
 
-float32 set_turn(Direction direction, float32 angular_velocity)
+float32 set_turn(Direction direction, float32 target_angle_radian)
 {
     float32 turn_radius = 0;
     float32 Base_Speed = 0;
@@ -104,10 +105,11 @@ float32 set_turn(Direction direction, float32 angular_velocity)
 
     Base_Speed = getCurrentSpeed(); //RPM_CMD1, RPM_CMD2의 평균으로 현재 속도를 계산
 
-    turn_radius = Base_Speed / angular_velocity;
+    turn_radius = CAR_LENGTH / tanf(target_angle_radian); //Base_Speed / (angular_velocity);
 
-    innerWheelSpeed = angular_velocity * (turn_radius - WHEEL_BASE/2);
-    outerWheelSpeed = angular_velocity * (turn_radius + WHEEL_BASE/2);
+
+    innerWheelSpeed = Base_Speed*(1 - WHEEL_BASE / (2 * turn_radius));//angular_velocity * (turn_radius - WHEEL_BASE/2);
+    outerWheelSpeed = Base_Speed*(1 + WHEEL_BASE / (2 * turn_radius));
 
     //휠 속도를 RPM으로 변환
     innerRPM = (innerWheelSpeed * 60.0f)/(2.0f*3.14159f*WHEEL_RADIUS);

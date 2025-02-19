@@ -24,9 +24,15 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS 
  * IN THE SOFTWARE.
  *********************************************************************************************************************/
+#include "BSW_GTM/GTM_TIM_Capture.h"
+#include "BSW_Sensor/TOF.h"
+#include "BSW_Sensor/Ultrasonic.h"
 #include "Ifx_Types.h"
 #include "IfxCpu.h"
 #include "IfxScuWdt.h"
+
+#include "BSP.h"
+
 
 
 extern IfxCpu_syncEvent g_cpuSyncEvent;
@@ -40,19 +46,19 @@ void core1_main(void)
      */
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     
+    init_tof();
+    generate_PWM();
+    Init_Ultrasonics();
+
     /* Wait for CPU sync event */
     IfxCpu_emitEvent(&g_cpuSyncEvent);
     IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
 
 
-    //초음파센서 값 사용시 cpu0에서 헤더 include 후
-    UData sensor_data = get_UltrasonicData(); //사용할곳에서 선언해주기
-    //sensor_data.side_filtered (측방), sensor_data.rear_filtered(후방) 선택 가능
-
     while(1)
     {
-        //메인 루프에서 돌려야 하는것
         get_tof_distance();
-
+        ReadUltrasonic_noFilt();
+        SideUltrasonic_noFilt();
     }
 }

@@ -1,5 +1,5 @@
 /**********************************************************************************************************************
- * \file ULTRA_FILT.c
+ * \file KALMAN_FILT.c
  * \copyright Copyright (C) Infineon Technologies AG 2019
  * 
  * Use of this file is subject to the terms of use agreed between (i) you or the company in which ordinary course of 
@@ -29,30 +29,16 @@
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
-#include "ULTRA_FILT.h"
-#include "BCW.h"
-#include "math.h"
+#include <KALMAN_FILT.h>
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
-#define ALPHA 0.1F
-#define MAX_THRESHOLD 50.0F
-#define MEDIAN_WINDOW_SIZE 6
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
-
-float32_t kmfRESULT = 0.0;
-float32_t KMF = 0.0;
-float32_t median_buffer[MEDIAN_WINDOW_SIZE] = {0};
-static int mIndex = 0;
-float32_t MF = 0.0;
-
-float32_t ult_noise = 50000.0;
-uint8_t flagg = 0;
-
+static float32 kfRESULT;
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
 /*********************************************************************************************************************/
@@ -64,77 +50,30 @@ uint8_t flagg = 0;
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
-UKFilter kmf;
+KFilter kf;
 
-void km_init(UKFilter *kmf, float32_t init_x, float32_t u_noise) {
-    kmf->x = init_x;                                      // initial position
-    kmf->p = 1000.0F;                                        // initial uncertainty
-    kmf->q = 0.0005F;                                          // sensor process noise(uncertainty of estimated value)
-    kmf->r = u_noise;                                        // measurement noise
+void kalman_init(KFilter *kf, float32 initial_x, float32 m_noise) {
+    kf->X = initial_x;                                      // initial position
+    kf->P = 1000.0F;                                        // initial uncertainty
+    kf->Q = 0.005F;                                          // sensor process noise(uncertainty of estimated value)
+    kf->R = m_noise;                                        // measurement noise
 }
 
-float32_t km_update(UKFilter *kmf, float32_t Z) {
+void kalman_update(KFilter *kf, float32 z) {
     // predict step
-    float32_t X_pred = kmf->x;                               // position predict
-    float32_t P_pred = kmf->p + kmf->q;                       // covariance predict
+    float32 X_pred = kf->X;                               // position predict
+    float32 P_pred = kf->P + kf->Q;                       // covariance predict
 
     // kalman gain calculate
-    float32_t K = P_pred / (P_pred + kmf->r);
+    float32 K = P_pred / (P_pred + kf->R);
 
     //update step
-    kmf->x = X_pred + K * (Z - X_pred);                      // estimated value revision
-    kmf->p = (1.0F - K) * P_pred;                            //covariance update
-    kmfRESULT = kmf->x;
+    kf->X = X_pred + K * (z - X_pred);                      // estimated value revision
+    kf->P = (1.0F - K) * P_pred;                            //covariance update
+    kfRESULT = kf->X;
 
-    return kmfRESULT;
 }
 
-float32_t median_filter(float32_t new_value, float32_t dur) {
-    float32_t sorted[MEDIAN_WINDOW_SIZE], temp;
-
-    median_buffer[mIndex] = new_value;
-    mIndex = (mIndex + 1) % MEDIAN_WINDOW_SIZE;
-
-    for (int i = 0; i < MEDIAN_WINDOW_SIZE; i++) {
-        sorted[i] = median_buffer[i];
-    }
-    for (int i = 0; i < MEDIAN_WINDOW_SIZE - 1; i++) {
-        for (int j = 0; j < MEDIAN_WINDOW_SIZE - i - 1; j++) {
-            if (sorted[j] > sorted[j + 1]) {
-                temp = sorted[j];
-                sorted[j] = sorted[j + 1];
-                sorted[j + 1] = temp;
-            }
-        }
-    }
-
-    MF = sorted[MEDIAN_WINDOW_SIZE / 2];
-    if(flagg == 0){
-        flagg = 1;
-        km_init(&kmf, MF, ult_noise);
-    }
-    KMF = km_update(&kmf, MF);
-    Back_Collision_Warning(KMF, dur);
-
-    return MF;
-}
-
-//uint32_t Low_Pass_Filter(float32_t new_value, float32_t dur){
-//    if(filtered_value == 0.0F){
-//        filtered_value = new_value;
-//    } else {
-//        if (fabsf(new_value - filtered_value) > MAX_THRESHOLD) {
-//          new_value = filtered_value;
-//        }
-//        filtered_value = ALPHA * new_value + (1-ALPHA) * filtered_value;
-//    }
-//    LPF = filtered_value;
-//
-//    Back_Collision_Warning(LPF, dur);
-//
-//    return (uint32_t)LPF;
-//}
-
-uint32_t get_ult_val(void){
-    return (float32_t)kmfRESULT;
+uint16_t get_kalman_val(void){
+    return (uint16_t)kfRESULT;
 }

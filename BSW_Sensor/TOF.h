@@ -1,5 +1,5 @@
 /**********************************************************************************************************************
- * \file ULTRA_FILT.h
+ * \file TOF.h
  * \copyright Copyright (C) Infineon Technologies AG 2019
  * 
  * Use of this file is subject to the terms of use agreed between (i) you or the company in which ordinary course of 
@@ -25,17 +25,36 @@
  * IN THE SOFTWARE.
  *********************************************************************************************************************/
 
-#ifndef FILTER_ULTRA_FILT_H_
-#define FILTER_ULTRA_FILT_H_
+#ifndef BSW_SENSOR_TOF_H_
+#define BSW_SENSOR_TOF_H_
 
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
+#include "IfxPort_reg.h"
+#include "IfxPort_bf.h"
+#include "IfxPort.h"
+#include "IfxPort_PinMap.h"
+#include "IfxAsclin_reg.h"
+#include "IfxAsclin_bf.h"
+#include "IfxAsclin_Asc.h"
+#include "IfxSrc_reg.h"
 #include "Ifx_Types.h"
+
+#include <stdint.h>
+#include <string.h>
+#include <math.h>
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
+#define ASC1_TX_BUFFER_SIZE          256                                     /* Define the TX buffer size in byte    */
+#define ASC1_RX_BUFFER_SIZE          256
+#define ASC1_BAUDRATE                921600
+
+#define ISR_PRIORITY_ASCLIN1_TX     0x21    /* Priority for interrupt ASCLIN1 Transmit  */
+#define ISR_PRIORITY_ASCLIN1_RX     0x20    /* Priority for interrupt ASCLIN1 Receive   */
+#define ISR_PRIORITY_ASCLIN1_ER     0x22    /* Priority for interrupt ASCLIN1 Errors    */
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
@@ -44,12 +63,7 @@
 /*********************************************************************************************************************/
 /*-------------------------------------------------Data Structures---------------------------------------------------*/
 /*********************************************************************************************************************/
- struct UKalmanFilter {
-         float32_t x;
-         float32_t p;
-         float32_t q;
-         float32_t r;
- }typedef UKFilter;
+ 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
 /*********************************************************************************************************************/
@@ -57,10 +71,7 @@
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
-void km_init(UKFilter*, float32_t, float32_t);
-float32_t km_update(UKFilter*, float32_t);
-float32_t median_filter(float32_t new_value, float32_t dur);
-//uint32_t Low_Pass_Filter(float32_t new_value, float32_t dur);
-uint32_t get_ult_val(void);
+void init_tof(void);
+uint32_t get_tof_distance(void);
 
-#endif /* FILTER_ULTRA_FILT_H_ */
+#endif /* BSW_SENSOR_TOF_H_ */

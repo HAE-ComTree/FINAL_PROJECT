@@ -28,22 +28,10 @@
 #include "IfxCpu.h"
 #include "IfxScuWdt.h"
 
-//추가해주세요
+
 #include "BSP.h"
-#include "Ultrasonic.h"
-#include "GTM_TIM_Capture.h"
-
-#include "TOF.h"
-
 
 IfxCpu_syncEvent g_cpuSyncEvent = 0;
-
-void init_total(void){
-    //init_ASCLIN_UART()
-    init_tof();
-    Init_Ultrasonics();
-}
-
 void core0_main(void)
 {
     IfxCpu_enableInterrupts();
@@ -54,16 +42,14 @@ void core0_main(void)
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
     
-    init_tof();
+
 
     /* Wait for CPU sync event */
     IfxCpu_emitEvent(&g_cpuSyncEvent);
     IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
 
 
-
     while(1)
     {
-
     }
 }

@@ -29,30 +29,35 @@
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
-#include "BCW.h"
-#include "math.h"
+#include <BCW.h>
+#include <BSW_Filter/ULTRA_FILT.h>
+#include <BSW_Sensor/Ultrasonic.h>
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
 #define DIST_THR 300.0F
+#define usToSec 100000.0F
+
+
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
-float32_t t1 = 0;
-float32_t t2 = 0;
-float32_t L1 = 0.0;                     //C*t1/2
-float32_t L2 = 0.0;                     //C*t2/2
-float32_t VA = 0.0;
-float32_t VB = 0.0;
-float32_t tcr = 0.0;                    //L2/(VB-BA)
-float32_t tex = 3.0;
-float32_t alpha = 2.0;                  //need calculate?
-const float32_t car_length = 257.0;
-const float32_t C = 0.343;
-uint8_t first_flag = 0;
+static float32 t1 = 0.0F;
+static float32 t2 = 0.0F;
+static float32 L1 = 0.0F;                     //C*t1/2
+static float32 L2 = 0.0F;                     //C*t2/2
 
-uint8_t WARN_FLAG = 0;
+static const float32 VA = 18.0F;
+static float32 VB = 0.0F;
+static float32 tcr = 0.0F;                    //L2/(VB-BA)
+static const float32 tex = 3.0F;
+static const float32 alpha = 0.5F;                  //need calculate?
+static const float32 car_length = 257.0F;
+
+static char first_flag = 0;
+
+static char WARN_FLAG = 0;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -66,7 +71,12 @@ uint8_t WARN_FLAG = 0;
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
 /*받아야 하는 정보: 각 시점의 거리값, 각 시점의 초음파 복귀시간, 현재 속도, 후행 차량의 속도, 차선 변경 예상소요시간*/
-uint8_t Back_Collision_Warning(float32_t distance, float32_t measure){
+
+/*
+ * 현재 제대로 작동X BCW 수정 필요함
+ *
+ */
+char Back_Collision_Warning(float32 distance, float32 measure){
 
     L2 = distance;
     t2 = measure;
@@ -82,7 +92,7 @@ uint8_t Back_Collision_Warning(float32_t distance, float32_t measure){
         t1 = t2;
     }
 
-    VB = VA + (L2-L1);
+    VB = VA + (L2-L1)/((t2-t1)*usToSec);
 
     if(fabsf(VB - VA) < 0.0001F){
         return WARN_FLAG;
@@ -92,7 +102,7 @@ uint8_t Back_Collision_Warning(float32_t distance, float32_t measure){
 
     if(tex < tcr){
         WARN_FLAG = 0;
-    } else if (tex > tcr){
+    } else if (tex > tcr && L2 < 1000){
         WARN_FLAG = 1;
     } else {
         if(L2 < (1+alpha) * car_length){
@@ -105,6 +115,6 @@ uint8_t Back_Collision_Warning(float32_t distance, float32_t measure){
     return WARN_FLAG;
 }
 
-uint8_t get_BCW_Flag(void){
+char get_BCW_Flag(void){
     return WARN_FLAG;
 }

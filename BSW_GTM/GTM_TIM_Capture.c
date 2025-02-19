@@ -30,14 +30,13 @@
 /*********************************************************************************************************************/
 
 #include "IfxGtm_Tim_In.h"
-#include "IfxGtm_Tom_Pwm.h"
 #include "IfxGtm_Atom_Pwm.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
 #define PWM_OUT         IfxGtm_ATOM1_1_TOUT10_P00_1_OUT  /* Port pin which is driven by the PWM                      */
-#define PWM_IN          IfxGtm_TIM2_5_TIN15_P00_6_IN     /* Input port pin for the PWM signal                        */
+#define PWM_IN          IfxGtm_TIM2_3_TIN13_P00_4_IN     /* Input port pin for the PWM signal                        */
 #define SIDE_PWM_IN     IfxGtm_TIM2_4_TIN14_P00_5_IN
 
 #define CLK_FREQ        1000000.0f                          /* CMU clock frequency, in Hertz                         */
@@ -55,16 +54,16 @@ float32 g_measuredPwmFreq_Hz = 0.0;                     /* Global variable for f
 float32 g_measuredPwmPeriod = 0.0;                      /* Global variable for period calculation of PWM signal     */
 IfxGtm_Tim_In g_driverTIM;                              /* TIM driver structure                                     */
 boolean g_dataCoherent = FALSE;                         /* Boolean to know if the measured data is coherent         */
-float32_t b_pwm_period_us;
-float32_t b_pwm_sec_us;
+float32 b_pwm_period_us;
+float32 b_pwm_sec_us;
 
 float32 s_measuredPwmDutyCycle = 0.0;
 float32 s_measuredPwmFreq_Hz = 0.0;
 float32 s_measuredPwmPeriod = 0.0;
 IfxGtm_Tim_In s_driverTIM;
 boolean s_dataCoherent = FALSE;
-float32_t s_pwm_period_us;
-float32_t s_pwm_sec_us;
+float32 s_pwm_period_us;
+float32 s_pwm_sec_us;
 
 
 
@@ -124,7 +123,7 @@ void generate_PWM(void)
 }
 
 /* This function measures the period, the frequency and the duty cycle of the PWM signal */
-float32_t measure_PWM(void)
+float32 measure_PWM(void)
 {
     IfxGtm_Tim_In_update(&g_driverTIM);                                         /* Update the measured data         */
     g_measuredPwmPeriod = IfxGtm_Tim_In_getPeriodSecond(&g_driverTIM);          /* Get the period of the PWM signal */
@@ -137,7 +136,7 @@ float32_t measure_PWM(void)
     return b_pwm_sec_us;
 }
 
-float32_t side_PWM(void) {
+float32 side_PWM(void) {
     IfxGtm_Tim_In_update(&s_driverTIM);                                         /* Update the measured data         */
     s_measuredPwmPeriod = IfxGtm_Tim_In_getPeriodSecond(&s_driverTIM);          /* Get the period of the PWM signal */
     s_measuredPwmFreq_Hz = 1 / s_measuredPwmPeriod;                             /* Calculate the frequency          */

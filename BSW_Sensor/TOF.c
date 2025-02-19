@@ -29,11 +29,8 @@
 /*********************************************************************************************************************/
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
-#include "TOF.h"
-#include "KALMAN_FILT.h"
-
-#include "string.h"
-#include "math.h"
+#include <TOF.h>
+#include "BSW_Filter/KALMAN_FILT.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
@@ -43,17 +40,17 @@
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
-uint8 g_asclin1_tx_buffer[ASC1_TX_BUFFER_SIZE + sizeof(Ifx_Fifo) + 8];
-uint8 g_asclin1_rx_buffer[ASC1_RX_BUFFER_SIZE + sizeof(Ifx_Fifo) + 8];
-uint32 g_rx_idx = 0;
-uint8 g_buf_tof[16] = { 0 };
+static uint8 g_asclin1_tx_buffer[ASC1_TX_BUFFER_SIZE + sizeof(Ifx_Fifo) + 8];
+static uint8 g_asclin1_rx_buffer[ASC1_RX_BUFFER_SIZE + sizeof(Ifx_Fifo) + 8];
+static uint32 g_rx_idx = 0;
+static uint8 g_buf_tof[16] = { 0 };
 IfxAsclin_Asc g_asclin1;
 const uint8 g_tof_length = 16;
-uint32_t tof_distance = 0;
-float32_t tof_noise = 0.0;
+static uint32_t tof_distance = 0;
+static float32 tof_noise = 0.0;
 
 KFilter kaf;
-uint8_t initFlag = 0;
+static char initFlag = 0;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -63,7 +60,7 @@ uint8_t initFlag = 0;
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
 static int verify_checksum(unsigned char data[]);
-static int check_tof_strength(unsigned char data[]);
+static int check_tof_strength(const unsigned char data[]);
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
@@ -154,22 +151,24 @@ static int verify_checksum(unsigned char data[])
     }
 }
 
-static int check_tof_strength(unsigned char data[])
+static int check_tof_strength(const unsigned char data[])
 {
-    sint32 tof_distance = data[8] | (data[9] << 8) | (data[10] << 16);
+    tof_distance = data[8] | (data[9] << 8) | (data[10] << 16);
     sint32 tof_signal_strength = data[12] | (data[13] << 8);
-    /* when distance over 2m - out of range */
 
     if (tof_signal_strength != 0 && tof_distance != 0xFFFFF6u) {
         return 1;
+    } else if(tof_signal_strength >= 1){
+        tof_distance = 6500;
+        return tof_distance;
     } else {
         return 0;
     }
 }
 
-uint32 get_tof_distance(void)
+uint32_t get_tof_distance(void)
 {
-    uint8 buf_tof[16];
+    uint8 buf_tof[g_tof_length];
 
     memcpy(buf_tof, g_buf_tof, g_tof_length);
 
@@ -182,16 +181,11 @@ uint32 get_tof_distance(void)
 
     tof_distance = buf_tof[8] | (buf_tof[9] << 8) | (buf_tof[10] << 16);
 
-    if(tof_distance < 0)
-    {
-        tof_distance = 0;
-    }
-
     if(tof_distance != 0) {
-        float32_t prev_distance = 0.0F;
+        float32 prev_distance = 0.0F;
         if(tof_distance <= 1000) {tof_noise = 9.0F;}
-        else if (tof_distance > 6500) {tof_noise = 250.0F;}
-        else {tof_noise = 90.0F;}
+        else if (tof_distance > 6500) {tof_noise = 2500.0F;}
+        else {tof_noise = 900.0F;}
 
         if (fabsf(tof_distance - prev_distance) > THR) {
             initFlag = 0;
@@ -199,9 +193,9 @@ uint32 get_tof_distance(void)
 
         if(initFlag == 0){
             initFlag = 1;
-            kalman_init(&kaf, (float32_t)tof_distance, tof_noise);
+            kalman_init(&kaf, (float32)tof_distance, tof_noise);
         }
-        kalman_update(&kaf, (float32_t)tof_distance);
+        kalman_update(&kaf, (float32)tof_distance);
     }
 
     return tof_distance;

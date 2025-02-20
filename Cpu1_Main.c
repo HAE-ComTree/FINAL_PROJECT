@@ -47,13 +47,11 @@ void core1_main(void)
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     
     init_tof();
-    generate_PWM();
     Init_Ultrasonics();
 
     /* Wait for CPU sync event */
     IfxCpu_emitEvent(&g_cpuSyncEvent);
     IfxCpu_waitEvent(&g_cpuSyncEvent, 1);
-
 
     while(1)
     {

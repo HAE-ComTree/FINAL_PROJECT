@@ -30,8 +30,9 @@
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
 #include <BCW.h>
-#include <BSW_Filter/ULTRA_FILT.h>
-#include <BSW_Sensor/Ultrasonic.h>
+#include "BSW_Filter/ULTRA_FILT.h"
+#include "BSW_Sensor/Ultrasonic.h"
+#include "Task_sch.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
@@ -55,9 +56,13 @@ static const float32 tex = 3.0F;
 static const float32 alpha = 0.5F;                  //need calculate?
 static const float32 car_length = 257.0F;
 
+static const float32 deltaT = 0.03F;
+
 static char first_flag = 0;
 
 static char WARN_FLAG = 0;
+
+static boolean preFlag = FALSE;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -70,15 +75,16 @@ static char WARN_FLAG = 0;
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
-/*받아야 하는 정보: 각 시점의 거리값, 각 시점의 초음파 복귀시간, 현재 속도, 후행 차량의 속도, 차선 변경 예상소요시간*/
 
-/*
- * 현재 제대로 작동X BCW 수정 필요함
- *
- */
 char Back_Collision_Warning(float32 distance, float32 measure){
+    boolean ChkFlag = toggle_BCW_Flag();
+    static float32 deltaD = 0.0F;
 
-    L2 = distance;
+    if(ChkFlag != preFlag){
+        L1 = L2;
+        L2 = distance;
+        preFlag = ChkFlag;
+    }
     t2 = measure;
 
     if(first_flag == 0) {
@@ -92,17 +98,19 @@ char Back_Collision_Warning(float32 distance, float32 measure){
         t1 = t2;
     }
 
-    VB = VA + (L2-L1)/((t2-t1)*usToSec);
+    VB = VA + (L2-L1)/deltaT;
 
-    if(fabsf(VB - VA) < 0.0001F){
+    deltaD = VB-VA;
+
+    if(fabsf(deltaD) < 0.0001F){
         return WARN_FLAG;
     }
 
-    tcr = L2/(VB-VA);
+    tcr = L2/(deltaD);
 
     if(tex < tcr){
         WARN_FLAG = 0;
-    } else if (tex > tcr && L2 < 1000){
+    } else if (tex > tcr){
         WARN_FLAG = 1;
     } else {
         if(L2 < (1+alpha) * car_length){

@@ -42,9 +42,6 @@
 /*********************************************************************************************************************/
 UKFilter ukf;
 
-static float32 rearcheck = 0.0;
-static float32 sidecheck = 0.0;
-
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
 /*********************************************************************************************************************/
@@ -52,7 +49,6 @@ static float32 sidecheck = 0.0;
 void Init_Ultrasonics(void)
 {
     init_TIM();
-    side_TIM();
 }
 
 double ReadUltrasonic_noFilt(void)
@@ -65,11 +61,10 @@ double ReadUltrasonic_noFilt(void)
     b_distance = 0.343 * b_duration / 2.0;
     if(!isnan(b_distance) && b_distance > 0.0) {
         if(b_distance < 50.0){b_distance = 50.0;}
+        if(b_distance > 2000.0){b_distance = 2000.0;}
 
-        median_filter(b_distance, b_duration);
+       low_pass_filter(b_distance, b_duration);
     }
-
-    rearcheck = b_distance;
 
     return b_distance;
 }
@@ -80,8 +75,6 @@ double SideUltrasonic_noFilt(void) {
 
     s_duration = side_PWM();
     s_distance = 0.343 * s_duration / 2.0;
-
-    sidecheck = s_distance;
 
     return s_distance;
 }

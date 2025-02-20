@@ -30,27 +30,27 @@
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
 #include <ULTRA_FILT.h>
-//#include "ASW/BCW.h"
+#include "ASW/BCW.h"
 #include <math.h>
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
 /*********************************************************************************************************************/
-#define ALPHA 0.1F
-#define MAX_THRESHOLD 50.0F
-#define MEDIAN_WINDOW_SIZE 6
-#define ult_noise 50000.F
+#define ALPHA 0.4F
+#define ult_noise 8000.F
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
-static float32 median_buffer[MEDIAN_WINDOW_SIZE] = {0};
-static float32 kmfRESULT = 0.0;
-static float32 KMF = 0.0;
+static float32 kmfRESULT = 0.0F;
+static float32 LPF = 0.0F;
+static char firstFlag = 0;
+static char mfFlag = 0;
+const float32 ALLOWED_CHANGE = 100.0;
 
-static int mIndex = 0;
-
-static char flagg = 0;
+static float32 KF = 0.0;
+static float32 MF = 0.0;
+static float32 durr = 0.0F;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -65,11 +65,41 @@ static char flagg = 0;
 /*********************************************************************************************************************/
 
 UKFilter kmf;
+MFilter mf;
+
+float32 low_pass_filter(float32 new_value, float32 dur){
+    static float32 prev_value = 0.0F;
+
+    if(LPF == 0.0F){
+        LPF = new_value;
+        prev_value = LPF;
+    }
+    else{
+        LPF = (ALPHA * new_value) + ((1.0F - ALPHA) * LPF);
+    }
+
+    float32 deltaL = fabsf(new_value - prev_value);
+    if(deltaL > ALLOWED_CHANGE){
+        LPF = prev_value;
+    }
+
+    if(firstFlag == 0){
+        firstFlag = 1;
+        km_init(&kmf, LPF, ult_noise);
+    }
+    KF = km_update(&kmf, LPF);
+
+    prev_value = new_value;
+
+    durr = dur;
+
+    return LPF;
+}
 
 void km_init(UKFilter *kmf, float32 init_x, float32 u_noise) {
     kmf->x = init_x;                                      // initial position
     kmf->p = 1000.0F;                                        // initial uncertainty
-    kmf->q = 0.0001F;                                          // sensor process noise(uncertainty of estimated value)
+    kmf->q = 0.00005F;                                          // sensor process noise(uncertainty of estimated value)
     kmf->r = u_noise;                                        // measurement noise
 }
 
@@ -86,40 +116,63 @@ float32 km_update(UKFilter *kmf, float32 Z) {
     kmf->p = (1.0F - K) * P_pred;                            //covariance update
     kmfRESULT = kmf->x;
 
+    update_median_filter(&mf, kmfRESULT);
+
+    //BCW active
+    Back_Collision_Warning(MF, durr);
+
     return kmfRESULT;
 }
 
-float32 median_filter(float32 new_value, float32 dur) {
-    float32 MF = 0.0;
-    float32 sorted[MEDIAN_WINDOW_SIZE], temp;
+static void selection_sort(float32 arr[], uint32_t size){
+    uint32_t minIdx = 0;
 
-    median_buffer[mIndex] = new_value;
-    mIndex = (mIndex + 1) % MEDIAN_WINDOW_SIZE;
-
-    for (int i = 0; i < MEDIAN_WINDOW_SIZE; i++) {
-        sorted[i] = median_buffer[i];
-    }
-    for (int i = 0; i < (MEDIAN_WINDOW_SIZE - 1); i++) {
-        for (int j = 0; j < (MEDIAN_WINDOW_SIZE - i - 1); j++) {
-            if (sorted[j] > sorted[j + 1]) {
-                temp = sorted[j];
-                sorted[j] = sorted[j + 1];
-                sorted[j + 1] = temp;
+    for(int i = 0; i < (size-1); i++){
+        minIdx = i;
+        for(int j = (i+1); j < size; j++){
+            if(arr[j] < arr[minIdx]){
+                minIdx = j;
             }
         }
-    }
 
-    MF = sorted[MEDIAN_WINDOW_SIZE / 2];
-    if(flagg == 0){
-        flagg = 1;
-        km_init(&kmf, MF, ult_noise);
+        float32 temp = arr[i];
+        arr[i] = arr[minIdx];
+        arr[minIdx] = temp;
     }
-    KMF = km_update(&kmf, MF);
-    //Back_Collision_Warning(KMF, dur);
+}
+
+static float32 get_median_val(const MFilter* mf){
+    float32 sortedVal[WINDOW_SIZE];
+
+    for(int i=0; i<WINDOW_SIZE; i++){
+        sortedVal[i] = mf->values[i];
+    }
+    selection_sort(sortedVal, WINDOW_SIZE);
+
+    MF = sortedVal[WINDOW_SIZE/2U];
 
     return MF;
 }
 
-uint16_t get_ult_val(void){
-    return (uint16_t)kmfRESULT;
+static float32 update_median_filter(MFilter* mf, float32 kfr){
+    if(mfFlag == 0){
+        for(int i = 0; i < WINDOW_SIZE; i++){
+            mf->values[i] = kfr;
+        }
+        mfFlag = 1;
+    }
+
+    for(int i=0; i<WINDOW_SIZE-1; i++){
+        mf->values[i] = mf->values[i+1];
+    }
+    mf->values[WINDOW_SIZE-1] = kfr;
+
+    return get_median_val(mf);
 }
+
+uint16_t get_ult_val(void){
+    return (uint16_t)MF;
+}
+
+
+

@@ -28,8 +28,9 @@
 #include "IfxCpu.h"
 #include "IfxScuWdt.h"
 
-
 #include "BSP.h"
+
+#include "Task_sch.h"
 
 IfxCpu_syncEvent g_cpuSyncEvent = 0;
 void core0_main(void)
@@ -42,7 +43,7 @@ void core0_main(void)
     IfxScuWdt_disableCpuWatchdog(IfxScuWdt_getCpuWatchdogPassword());
     IfxScuWdt_disableSafetyWatchdog(IfxScuWdt_getSafetyWatchdogPassword());
     
-
+    initCanTaskScheduler();
 
     /* Wait for CPU sync event */
     IfxCpu_emitEvent(&g_cpuSyncEvent);
@@ -51,5 +52,6 @@ void core0_main(void)
 
     while(1)
     {
+
     }
 }

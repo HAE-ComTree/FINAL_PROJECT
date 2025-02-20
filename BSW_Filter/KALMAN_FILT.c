@@ -71,7 +71,6 @@ void kalman_update(KFilter *kf, float32 z) {
     kf->X = X_pred + K * (z - X_pred);                      // estimated value revision
     kf->P = (1.0F - K) * P_pred;                            //covariance update
     kfRESULT = kf->X;
-
 }
 
 uint16_t get_kalman_val(void){

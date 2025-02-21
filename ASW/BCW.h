@@ -55,7 +55,7 @@
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
-char Back_Collision_Warning(float32 distance, float32 measure);
-char get_BCW_Flag(void);
+boolean Back_Collision_Warning(float32 distance, float32 measure);
+boolean get_BCW_Flag(void);
 
 #endif /* ASW_BCW_H_ */

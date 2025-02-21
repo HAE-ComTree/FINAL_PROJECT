@@ -30,7 +30,7 @@
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
 #include <ULTRA_FILT.h>
-#include "ASW/BCW.h"
+#include "../ASW/BCW.h"
 #include <math.h>
 
 /*********************************************************************************************************************/
@@ -38,19 +38,21 @@
 /*********************************************************************************************************************/
 #define ALPHA 0.4F
 #define ult_noise 8000.F
+#define WINDOW_SIZE 7u
 
 /*********************************************************************************************************************/
 /*-------------------------------------------------Global variables--------------------------------------------------*/
 /*********************************************************************************************************************/
 static float32 kmfRESULT = 0.0F;
 static float32 LPF = 0.0F;
-static char firstFlag = 0;
-static char mfFlag = 0;
+static boolean firstFlag = FALSE;
+static boolean mfFlag = FALSE;
 const float32 ALLOWED_CHANGE = 100.0;
 
 static float32 KF = 0.0;
 static float32 MF = 0.0;
 static float32 durr = 0.0F;
+static float32 sortedVal[WINDOW_SIZE];
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -83,8 +85,8 @@ float32 low_pass_filter(float32 new_value, float32 dur){
         LPF = prev_value;
     }
 
-    if(firstFlag == 0){
-        firstFlag = 1;
+    if(firstFlag == FALSE){
+        firstFlag = TRUE;
         km_init(&kmf, LPF, ult_noise);
     }
     KF = km_update(&kmf, LPF);
@@ -124,12 +126,11 @@ float32 km_update(UKFilter *kmf, float32 Z) {
     return kmfRESULT;
 }
 
-static void selection_sort(float32 arr[], uint32_t size){
-    uint32_t minIdx = 0;
+static void selection_sort(float32 arr[], uint8_t size){
 
-    for(int i = 0; i < (size-1); i++){
-        minIdx = i;
-        for(int j = (i+1); j < size; j++){
+    for(uint8_t i = 0; i < (size-1u); i++){
+        uint8_t minIdx = i;
+        for(uint8_t j = (i+1u); j < size; j++){
             if(arr[j] < arr[minIdx]){
                 minIdx = j;
             }
@@ -142,27 +143,24 @@ static void selection_sort(float32 arr[], uint32_t size){
 }
 
 static float32 get_median_val(const MFilter* mf){
-    float32 sortedVal[WINDOW_SIZE];
-
     for(int i=0; i<WINDOW_SIZE; i++){
         sortedVal[i] = mf->values[i];
     }
     selection_sort(sortedVal, WINDOW_SIZE);
-
-    MF = sortedVal[WINDOW_SIZE/2U];
+    MF = sortedVal[WINDOW_SIZE/2u];
 
     return MF;
 }
 
 static float32 update_median_filter(MFilter* mf, float32 kfr){
-    if(mfFlag == 0){
+    if(mfFlag == FALSE){
         for(int i = 0; i < WINDOW_SIZE; i++){
             mf->values[i] = kfr;
         }
-        mfFlag = 1;
+        mfFlag = TRUE;
     }
 
-    for(int i=0; i<WINDOW_SIZE-1; i++){
+    for(int i=0; i<(WINDOW_SIZE-1); i++){
         mf->values[i] = mf->values[i+1];
     }
     mf->values[WINDOW_SIZE-1] = kfr;

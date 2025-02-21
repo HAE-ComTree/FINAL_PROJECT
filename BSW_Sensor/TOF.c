@@ -30,7 +30,7 @@
 /*-----------------------------------------------------Includes------------------------------------------------------*/
 /*********************************************************************************************************************/
 #include <TOF.h>
-#include "BSW_Filter/KALMAN_FILT.h"
+#include "../BSW_Filter/KALMAN_FILT.h"
 
 /*********************************************************************************************************************/
 /*------------------------------------------------------Macros-------------------------------------------------------*/
@@ -46,11 +46,11 @@ static uint32 g_rx_idx = 0;
 static uint8 g_buf_tof[16] = { 0 };
 IfxAsclin_Asc g_asclin1;
 const uint8 g_tof_length = 16;
-static uint32_t tof_distance = 0;
+static uint32_t tof_distance = 0u;
 static float32 tof_noise = 0.0;
 
 KFilter kaf;
-static char initFlag = 0;
+static boolean initFlag = FALSE;
 
 /*********************************************************************************************************************/
 /*--------------------------------------------Private Variables/Constants--------------------------------------------*/
@@ -59,7 +59,7 @@ static char initFlag = 0;
 /*********************************************************************************************************************/
 /*------------------------------------------------Function Prototypes------------------------------------------------*/
 /*********************************************************************************************************************/
-static int verify_checksum(unsigned char data[]);
+static int verify_checksum(const unsigned char data[]);
 static int check_tof_strength(const unsigned char data[]);
 /*********************************************************************************************************************/
 /*---------------------------------------------Function Implementations----------------------------------------------*/
@@ -138,13 +138,13 @@ void init_tof(void)
     IfxAsclin_Asc_initModule(&g_asclin1, &asc_conf);          /* Initialize the module with the given configuration   */
 }
 
-static int verify_checksum(unsigned char data[])
+static int verify_checksum(const unsigned char data[])
 {
     uint8 checksum = 0;
-    for (int i = 0; i < g_tof_length - 1; i++) {
+    for (int i = 0; i < (g_tof_length - 1); i++) {
         checksum += data[i];
     }
-    if (data[0] == 0x57 && data[1] == 0x0 && data[2] == 0xFF) {
+    if ((data[0] == 0x57) && (data[1] == 0x0) && (data[2] == 0xFF)) {
         return checksum == data[g_tof_length - 1];
     } else {
         return 0;
@@ -156,10 +156,10 @@ static int check_tof_strength(const unsigned char data[])
     tof_distance = data[8] | (data[9] << 8) | (data[10] << 16);
     sint32 tof_signal_strength = data[12] | (data[13] << 8);
 
-    if (tof_signal_strength != 0 && tof_distance != 0xFFFFF6u) {
+    if ((tof_signal_strength != 0) && (tof_distance != 0xFFFFF6u)) {
         return 1;
     } else if(tof_signal_strength >= 1){
-        tof_distance = 6500;
+        tof_distance = 6500u;
         return tof_distance;
     } else {
         return 0;
@@ -181,10 +181,10 @@ uint32_t get_tof_distance(void)
 
     tof_distance = buf_tof[8] | (buf_tof[9] << 8) | (buf_tof[10] << 16);
 
-    if(tof_distance != 0) {
-        float32 prev_distance = 0.0F;
-        if(tof_distance <= 1000) {tof_noise = 9.0F;}
-        else if (tof_distance > 6500) {tof_noise = 2500.0F;}
+    if(tof_distance != 0u) {
+        uint32_t prev_distance = 0u;
+        if(tof_distance <= 1000u) {tof_noise = 9.0F;}
+        else if (tof_distance > 6500u) {tof_noise = 2500.0F;}
         else {tof_noise = 900.0F;}
 
         if (fabsf(tof_distance - prev_distance) > THR) {
